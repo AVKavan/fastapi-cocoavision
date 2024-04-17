@@ -63,7 +63,7 @@ async def predict(image: UploadFile):
 
 
 # Initialize the inference pipeline
-model_id = "cocoa-fxvcr/3"
+model_id = "merged-project-ozbro/1"
 output_file_name = "outputfile.mp4"
 
 @app.get("/")
@@ -84,6 +84,7 @@ async def process_video(video_file: UploadFile = File(...)):
     # Initialize and start the inference pipeline
     pipeline = InferencePipeline.init(
         model_id=model_id,
+        api_key= "INc4g2WbMuzVOyCAXNVp",
         video_reference="uploaded_video.mp4",
         on_prediction=video_sink.on_prediction
     )

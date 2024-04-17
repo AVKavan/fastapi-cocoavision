@@ -11,7 +11,6 @@ import supervision as sv
 import cv2
 from inference.core.interfaces.stream.sinks import VideoFileSink
 from inference import InferencePipeline
-from roboflow import Roboflow
 
 app = FastAPI()
 

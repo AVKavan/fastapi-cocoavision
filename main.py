@@ -1,7 +1,7 @@
 from base64 import b64encode
 import json
 import os
-from fastapi import FastAPI, File, UploadFile,Response
+from fastapi import FastAPI, File, UploadFile,Response,HTTPException
 from PIL import Image
 import io
 from fastapi.responses import StreamingResponse
@@ -11,8 +11,13 @@ import supervision as sv
 import cv2
 from inference.core.interfaces.stream.sinks import VideoFileSink
 from inference import InferencePipeline
+from roboflow import Roboflow
+import os
+from mangum import Mangum
 
 app = FastAPI()
+
+handler = Mangum(app)
 
 @app.post("/predict")
 async def predict(image: UploadFile):
@@ -22,7 +27,7 @@ async def predict(image: UploadFile):
     img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
     # load a pre-trained yolov8n model
-    model = get_model(model_id="merged-project-ozbro/1",api_key="INc4g2WbMuzVOyCAXNVp")
+    model = get_model(model_id="merged-project-2/1",api_key="INc4g2WbMuzVOyCAXNVp")
 
     # run inference on our chosen image
     results = model.infer(img_array)
@@ -63,12 +68,9 @@ async def predict(image: UploadFile):
 
 
 # Initialize the inference pipeline
-model_id = "merged-project-ozbro/1"
+model_id = "merged-project-2/1"
 output_file_name = "outputfile.mp4"
 
-@app.get("/")
-def index():
-    return {"details": "Cocoa-vision"}
 
 import subprocess
  
@@ -107,3 +109,32 @@ async def process_video(video_file: UploadFile = File(...)):
 
     # Return the processed video and results as response
     return Response(content=video_data, media_type="video/mp4")
+
+
+
+rf = Roboflow(api_key="INc4g2WbMuzVOyCAXNVp")
+project = rf.workspace().project("merged-project-2")
+model = project.version("1").model
+
+@app.post("/predict_video/")
+async def predict_video(file: UploadFile = File(...)):
+    # Save the uploaded video file
+    with open("uploaded_video.mp4", "wb") as buffer:
+        buffer.write(await file.read())
+
+    # Perform prediction on the uploaded video
+    job_id, signed_url, expire_time = model.predict_video(
+        "uploaded_video.mp4",
+        fps=5,
+        prediction_type="batch-video",
+    )
+
+    # Poll until results are ready
+    results = model.poll_until_video_results(job_id)
+
+    os.remove("uploaded_video.mp4");
+
+    if not results:
+        raise HTTPException(status_code=404, detail="Video prediction results not found")
+
+    return results

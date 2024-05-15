@@ -4,9 +4,9 @@ fastapi==0.110.1
 inference==0.10.0
 mangum==0.17.0
 numpy==1.25.2
-opencv-python==4.8.0.76
+opencv-python-headless==4.8.0.74
 pillow==10.3.0
 roboflow==1.1.26
 supervision==0.19.0
-python-multipart
+python-mutlipart
 uvicorn

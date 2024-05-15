@@ -1,4 +1,3 @@
-from base64 import b64encodepi
 import json
 import os
 from fastapi import FastAPI, File, UploadFile,Response,HTTPException
